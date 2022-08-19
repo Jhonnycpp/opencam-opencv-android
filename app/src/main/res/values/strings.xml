@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">OpenCam</string>
+    <string name="processed_image">processed image</string>
+</resources>

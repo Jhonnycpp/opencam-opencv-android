@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true" >
+        <layer-list>
+            <item>
+                <shape
+                    android:shape="oval">
+                    <solid android:color="@color/button_press"/>
+                </shape>
+            </item>
+            <item android:drawable="@drawable/square_button" android:gravity="center"/>
+            <item android:gravity="right"
+                android:width="20dp"
+                android:height="20dp"
+                android:drawable="@android:drawable/ic_popup_sync"/>
+        </layer-list>
+    </item>
+    <item>
+        <layer-list>
+            <item>
+                <shape
+                    android:shape="oval">
+                    <solid android:color="@color/button"/>
+                </shape>
+            </item>
+            <item android:drawable="@drawable/square_button" android:gravity="center"/>
+            <item android:gravity="right"
+                android:width="20dp"
+                android:height="20dp"
+                android:drawable="@android:drawable/ic_popup_sync"/>
+        </layer-list>
+    </item>
+</selector>
