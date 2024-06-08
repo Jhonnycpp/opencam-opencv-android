@@ -10,12 +10,13 @@ kapt {
 }
 
 android {
-    compileSdk 32
-
+    compileSdk 34
+    namespace "br.com.opencam"
+    testNamespace "br.com.opencam.test"
     defaultConfig {
         applicationId "br.com.opencam"
         minSdk 23
-        targetSdk 32
+        targetSdk 34
         versionCode 1
         versionName "1.0"
 
@@ -24,54 +25,65 @@ android {
 
     buildFeatures {
         viewBinding true
+        buildConfig true
+    }
+
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'armeabi', 'armeabi-v7a', 'arm64-v8a', 'x86_64'
+            universalApk true
+        }
     }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = JavaVersion.VERSION_17
     }
     packagingOptions {
-        pickFirst 'lib/arm64-v8a/libc++_shared.so'
-        pickFirst 'lib/x86/libc++_shared.so'
-        pickFirst 'lib/x86_64/libc++_shared.so'
-        pickFirst 'lib/armeabi-v7a/libc++_shared.so'
+        jniLibs {
+            pickFirsts += ['lib/arm64-v8a/libc++_shared.so', 'lib/x86/libc++_shared.so', 'lib/x86_64/libc++_shared.so', 'lib/armeabi-v7a/libc++_shared.so']
+        }
     }
+    namespace 'br.com.opencam'
 }
 
 dependencies {
     implementation project(":opencv")
 
-    implementation "androidx.core:core-ktx:${androidCoreVersion}"
-    implementation "androidx.appcompat:appcompat:${appcompatVersion}"
-    implementation "com.google.android.material:material:${materialVersion}"
-    implementation "androidx.constraintlayout:constraintlayout:${constraintlayoutVersion}"
-    implementation "androidx.fragment:fragment-ktx:${fragmentKtxVersion}"
-    implementation "androidx.activity:activity-ktx:${activityKtxVersion}"
-    implementation "androidx.multidex:multidex:${multidexVersion}"
+    implementation libs.core.ktx
+    implementation libs.core.appcompat
+    implementation libs.core.multidex
+    implementation libs.ui.material
+    implementation libs.ui.constraintlayout
+    implementation libs.ui.fragment.ktx
+    implementation libs.ui.activity.ktx
 
-    implementation("androidx.camera:camera-camera2:${cameraxVersion}")
-    implementation("androidx.camera:camera-lifecycle:${cameraxVersion}")
-    implementation("androidx.camera:camera-view:${cameraxVersion}")
-    implementation("androidx.camera:camera-extensions:${cameraxVersion}")
+    implementation libs.misc.camera
+    implementation libs.misc.camera.lifecycle
+    implementation libs.misc.camera.view
+    implementation libs.misc.camera.ext
 
-    implementation "com.google.dagger:hilt-android:${hiltVersion}"
-    kapt "com.google.dagger:hilt-compiler:${hiltVersion}"
+    implementation libs.di.hilt
+    kapt libs.di.hilt.compiler
 
-    testImplementation "junit:junit:${junitVersion}"
-    androidTestImplementation "androidx.test.ext:junit:${androidXJUnitVersion}"
-    androidTestImplementation  "com.google.dagger:hilt-android-testing:${hiltVersion}"
-    kaptAndroidTest "com.google.dagger:hilt-compiler:${hiltVersion}"
+    testImplementation libs.test.junit
+    androidTestImplementation libs.test.android.junit
+    androidTestImplementation libs.test.android.hilt
+    kaptAndroidTest libs.di.hilt.compiler
 
-    androidTestImplementation "androidx.test.espresso:espresso-core:${espressoVersion}"
-    testImplementation "com.google.dagger:hilt-android-testing:${hiltVersion}"
-    kaptTest "com.google.dagger:hilt-compiler:${hiltVersion}"
+    androidTestImplementation libs.test.android.espresso
+    testImplementation libs.test.android.hilt
+    kaptTest libs.di.hilt.compiler
 }

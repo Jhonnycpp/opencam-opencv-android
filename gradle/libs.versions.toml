@@ -1,0 +1,47 @@
+[versions]
+# Plugins
+androidPlugins="8.3.2"
+kotlin="1.9.24"
+
+# Dependencies
+androidCoreVersion = "1.13.1"
+cameraxVersion = "1.3.3"
+fragmentKtxVersion = "1.7.1"
+activityKtxVersion = "1.9.0"
+constraintlayoutVersion = "2.1.4"
+materialVersion = "1.12.0"
+appcompatVersion = "1.7.0"
+junitVersion = "4.13.2"
+androidXJUnitVersion = "1.1.5"
+espressoVersion = "3.5.1"
+hiltVersion = "2.46.1"
+multidexVersion = "2.0.1"
+
+[libraries]
+core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidCoreVersion" }
+core-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompatVersion" }
+core-multidex = { module = "androidx.multidex:multidex", version.ref = "multidexVersion" }
+
+ui-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtxVersion" }
+ui-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activityKtxVersion" }
+ui-material = { module = "com.google.android.material:material", version.ref = "materialVersion" }
+ui-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayoutVersion" }
+
+misc-camera = { module = "androidx.camera:camera-camera2", version.ref = "cameraxVersion" }
+misc-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "cameraxVersion" }
+misc-camera-view = { module = "androidx.camera:camera-view", version.ref = "cameraxVersion" }
+misc-camera-ext = { module = "androidx.camera:camera-extensions", version.ref = "cameraxVersion" }
+
+di-hilt = { module = "com.google.dagger:hilt-android", version.ref = "hiltVersion" }
+di-hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltVersion" }
+
+test-junit = { module = "junit:junit", version.ref = "junitVersion" }
+test-android-junit = { module = "androidx.test.ext:junit", version.ref = "androidXJUnitVersion" }
+test-android-espresso = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoVersion" }
+test-android-hilt = { module = "com.google.dagger:hilt-android-testing", version.ref = "hiltVersion" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "androidPlugins" }
+android-library = { id = "com.android.library", version.ref = "androidPlugins" }
+android-kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hiltVersion" }

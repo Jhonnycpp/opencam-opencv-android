@@ -5,13 +5,7 @@ import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.ImageFormat
-import android.graphics.Matrix
-import android.graphics.Paint
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.graphics.Rect
 import android.graphics.YuvImage
 import android.media.Image
@@ -29,16 +23,19 @@ import androidx.camera.core.Preview
 import androidx.camera.core.UseCaseGroup
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import br.com.opencam.databinding.ActivityMainBinding
 import br.com.opencam.dto.CamState
 import br.com.opencam.dto.CamType
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.Executors
-import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.collectLatest
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -48,20 +45,33 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        lifecycleScope.launchWhenStarted {
-            viewModel.canUseCam.collectLatest {
-                when (it) {
-                    CamState.DeviceHaveNotCam -> TODO("Exibir o fragment de que o device não possui camera.")
-                    CamState.NeedPermission -> requestPermissions(arrayOf(Manifest.permission.CAMERA), CAMERA_PERMISSION_CODE)
-                    CamState.CamRun -> runCamera()
-                    CamState.Unknown -> viewModel.prepareCamera(this@MainActivity)
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.canUseCam.collectLatest {
+                    when (it) {
+                        CamState.DeviceHaveNotCam -> TODO("Exibir o fragment de que o device não possui camera.")
+                        CamState.NeedPermission -> requestPermissions(arrayOf(Manifest.permission.CAMERA), CAMERA_PERMISSION_CODE)
+                        CamState.CamRun -> runCamera()
+                        CamState.Unknown -> viewModel.prepareCamera(this@MainActivity)
+                    }
                 }
             }
         }
 
-        lifecycleScope.launchWhenStarted {
-            viewModel.selectedCam.collectLatest {
-                runCamera(it)
+        lifecycleScope.launch{
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.currentVariance.collect { (variance, isBlur) ->
+                        binding.txtCurrentVariance.text = "Current: $variance ($isBlur)"
+                    }
+                }
+                launch { viewModel.minVariance.collect { binding.txtMinVariance.text = "Min: $it" } }
+                launch(Dispatchers.Default) {
+                    viewModel.selectedCam.collectLatest {
+                        runCamera(it)
+                    }
+                }
             }
         }
 

@@ -36,7 +36,8 @@
         android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/previewView"
         app:layout_constraintEnd_toEndOf="@+id/previewView"
-        tools:ignore="SpeakableTextPresentCheck,ImageContrastCheck" />
+        tools:ignore="SpeakableTextPresentCheck,ImageContrastCheck"
+        tools:visibility="visible" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/takePhoto"
@@ -49,4 +50,32 @@
         app:layout_constraintEnd_toStartOf="@+id/previewView"
         app:layout_constraintStart_toStartOf="parent"
         tools:ignore="SpeakableTextPresentCheck" />
+
+    <TextView
+        android:id="@+id/txtMinVariance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="Min: 0.00"
+        android:textColor="@color/red"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Min: 999999.00" />
+
+    <TextView
+        android:id="@+id/txtCurrentVariance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:text="Current: 0.00 (false)"
+        android:textColor="@color/red"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtMinVariance"
+        tools:text="Current: 999999.00 (false)" />
 </androidx.constraintlayout.widget.ConstraintLayout>

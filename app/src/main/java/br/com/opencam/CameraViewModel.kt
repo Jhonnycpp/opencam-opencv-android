@@ -4,36 +4,33 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Matrix
-import android.graphics.Paint
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.opencam.adapter.CameraAdapter
 import br.com.opencam.dto.CamState
 import br.com.opencam.dto.CamType
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import org.opencv.android.Utils
-import org.opencv.core.Mat
-import org.opencv.imgproc.Imgproc
+import javax.inject.Inject
 
 @HiltViewModel
 class CameraViewModel @Inject constructor(
     private val cameraAdapter: CameraAdapter
 ) : ViewModel() {
-    private var camType: CamType = CamType.BACK
-    private var _selectedCam = MutableSharedFlow<CamType>()
-    var canUseCam = MutableStateFlow<CamState>(CamState.Unknown)
-    val selectedCam: SharedFlow<CamType> get() = _selectedCam.asSharedFlow()
+    private var _selectedCam: MutableStateFlow<CamType> = MutableStateFlow(CamType.BACK)
+    private var _canUseCam: MutableStateFlow<CamState> = MutableStateFlow(CamState.Unknown)
+    private var _minVariance: MutableStateFlow<Double> = MutableStateFlow(Double.MAX_VALUE)
+    private var _currentVariance: MutableStateFlow<Pair<Double, Boolean>> = MutableStateFlow(Double.MAX_VALUE to false)
+
+    val canUseCam: StateFlow<CamState> get() = _canUseCam.asStateFlow()
+    val selectedCam: StateFlow<CamType> get() = _selectedCam.asStateFlow()
+    val minVariance: StateFlow<Double> get() = _minVariance.asStateFlow()
+    val currentVariance: StateFlow<Pair<Double, Boolean>> get() = _currentVariance.asStateFlow()
 
     fun prepareCamera(context: Context) {
         viewModelScope.launch {
@@ -44,19 +41,15 @@ class CameraViewModel @Inject constructor(
 
     fun permissionGrantedToUseCam() {
         viewModelScope.launch {
-            canUseCam.emit(CamState.CamRun)
+            _canUseCam.value = CamState.CamRun
         }
     }
 
     fun swapCam() {
-        viewModelScope.launch {
-            camType = if (camType == CamType.BACK) {
-                _selectedCam.emit(CamType.FRONT)
-                CamType.FRONT
-            } else {
-                _selectedCam.emit(CamType.BACK)
-                CamType.BACK
-            }
+        if (_selectedCam.value == CamType.BACK) {
+            _selectedCam.value = CamType.FRONT
+        } else {
+            _selectedCam.value = CamType.BACK
         }
     }
 
@@ -64,6 +57,17 @@ class CameraViewModel @Inject constructor(
         if (image == null) return null
 
         return image.run {
+            val fastAnalysed = BlurValidation.isBlurredImageFastDetection(this)
+            val slowlyAnalysed = BlurValidation.isBlurredImageSlowlyDetection(this)
+//            Log.d("CameraViewModel", "isBlurredImageFastDetection: $fastAnalysed isBlurredImageSlowlyDetection: $slowlyAnalysed")
+
+            if (slowlyAnalysed && fastAnalysed < _minVariance.value) _minVariance.value = fastAnalysed.also {
+                Log.d("CameraViewModel", "minimal value: $it")
+            }
+
+            _currentVariance.value = fastAnalysed to slowlyAnalysed
+
+            /*
             // Create OpenCV mat object and copy content from bitmap
             val mat = Mat()
             Utils.bitmapToMat(image, mat)
@@ -76,39 +80,27 @@ class CameraViewModel @Inject constructor(
             Utils.matToBitmap(mat, grayBitmap)
 
             grayBitmap.rotate(rotationDegrees)
+            */
+            this.rotate(rotationDegrees)
         }
     }
 
-    private suspend fun hasCamera() {
+    private fun hasCamera() {
         if (!cameraAdapter.hasCamera()) {
-            canUseCam.emit(CamState.DeviceHaveNotCam)
+            _canUseCam.value = CamState.DeviceHaveNotCam
         }
     }
 
-    private suspend fun hasPermission(context: Context) {
+    private fun hasPermission(context: Context) {
         when (PackageManager.PERMISSION_GRANTED) {
-            context.checkSelfPermission(Manifest.permission.CAMERA) -> canUseCam.emit(CamState.CamRun)
-            else -> canUseCam.emit(CamState.NeedPermission)
+            context.checkSelfPermission(Manifest.permission.CAMERA) -> _canUseCam.value = CamState.CamRun
+            else -> _canUseCam.value = CamState.NeedPermission
         }
     }
 
-    private fun Bitmap?.colorFilter(
-        color: Int = Color.GREEN,
-        mode: PorterDuff.Mode = PorterDuff.Mode.DARKEN
-    ): Bitmap? {
-        if (this == null) return null
-        val bitmap = copy(Bitmap.Config.ARGB_8888, true)
-        Paint().apply {
-            val filter = PorterDuffColorFilter(color, mode)
-            colorFilter = filter
-            Canvas(bitmap).drawBitmap(this@colorFilter, 0f, 0f, this)
-        }
-        return bitmap
-    }
-
-    private fun Bitmap?.rotate(degrees: Int): Bitmap? = if (this == null)
+    private fun Bitmap?.rotate(degrees: Int): Bitmap? = if (this == null) {
         null
-    else
+    } else {
         Bitmap.createBitmap(this, 0, 0, width, height, Matrix().apply { postRotate(degrees.toFloat()) }, true)
-
+    }
 }
