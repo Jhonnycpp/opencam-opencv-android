@@ -78,4 +78,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtMinVariance"
         tools:text="Current: 999999.00 (false)" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/enableGrayScale"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Gray"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/takePhoto"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/takePhoto" />
 </androidx.constraintlayout.widget.ConstraintLayout>

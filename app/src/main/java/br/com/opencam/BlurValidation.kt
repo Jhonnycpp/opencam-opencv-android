@@ -10,7 +10,7 @@ import org.opencv.core.MatOfDouble
 import org.opencv.imgproc.Imgproc
 import kotlin.math.pow
 
-
+// TODO(CleanArch): Criar um adapter
 object BlurValidation {
     private const val DOUBLE_PATTERN = "%.2f"
     private const val SOGLIA = -6118750

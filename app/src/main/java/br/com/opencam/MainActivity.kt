@@ -61,18 +61,15 @@ class MainActivity : AppCompatActivity() {
 
         lifecycleScope.launch{
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    viewModel.currentVariance.collect { (variance, isBlur) ->
-                        binding.txtCurrentVariance.text = "Current: $variance ($isBlur)"
-                    }
-                }
+                launch { viewModel.currentVariance.collect { (variance, isBlur) -> binding.txtCurrentVariance.text = "Current: $variance ($isBlur)" } }
+                launch { viewModel.enabledGrayScale.collect { binding.enableGrayScale.isChecked = it } }
                 launch { viewModel.minVariance.collect { binding.txtMinVariance.text = "Min: $it" } }
-                launch(Dispatchers.Default) {
-                    viewModel.selectedCam.collectLatest {
-                        runCamera(it)
-                    }
-                }
+                launch(Dispatchers.Default) { viewModel.selectedCam.collectLatest { runCamera(it) } }
             }
+        }
+
+        binding.enableGrayScale.setOnClickListener {
+            viewModel.setGrayScale(binding.enableGrayScale.isChecked)
         }
 
         binding.swapCam.setOnClickListener {
